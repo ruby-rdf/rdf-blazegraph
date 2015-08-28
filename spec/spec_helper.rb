@@ -1,7 +1,10 @@
 require "bundler/setup"
+
 require 'rdf/blazegraph'
+
 require 'rdf/spec'
 require 'rdf/spec/matchers'
+require 'rdf/isomorphic'
 
 Dir['./spec/support/**/*.rb'].each { |f| require f }
 
