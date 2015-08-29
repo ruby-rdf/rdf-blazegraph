@@ -23,7 +23,7 @@ Gem::Specification.new do |gem|
   gem.requirements               = []
 
   gem.add_runtime_dependency     'rdf', '~> 1.1'
-  gem.add_runtime_dependency     'sparql-client'
+  gem.add_runtime_dependency     'sparql-client', '~>1.1'
 
   gem.add_development_dependency 'rdf-spec',    '~> 1.1', '>= 1.1.13'
   gem.add_development_dependency 'rspec',       '~> 3.0'
