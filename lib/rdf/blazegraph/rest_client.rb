@@ -21,8 +21,6 @@ module RDF::Blazegraph
     ##
     # Send a request to the server
     #
-    # @todo handle POST requests
-    #
     # @param [String] query
     #
     # @return [Net::HTTP::Response] the server's response

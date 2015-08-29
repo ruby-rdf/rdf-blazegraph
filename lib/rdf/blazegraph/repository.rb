@@ -2,8 +2,6 @@ module RDF::Blazegraph
   ##
   # An RDF::Repository implementaton for Blazegraph (formerly BigData).
   #
-  # @todo support context
-  #
   # @see RDF::Repository
   class Repository < SPARQL::Client::Repository
     ##
@@ -106,7 +104,6 @@ module RDF::Blazegraph
     ##
     # Queries `self` for RDF statements matching the given `pattern`.
     #
-    # @todo: handle quads
     # @see SPARQL::Client::Repository#query_pattern
     def query_pattern(pattern, &block)
       pattern = pattern.dup
