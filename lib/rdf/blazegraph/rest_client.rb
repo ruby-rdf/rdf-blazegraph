@@ -119,7 +119,7 @@ module RDF::Blazegraph
 
       statements.map! do |s| 
         statement = RDF::Statement.from(s)
-        statement.context ||= NULL_GRAPH_URI 
+        statement.graph_name ||= NULL_GRAPH_URI 
         statement
       end
 
@@ -162,8 +162,7 @@ module RDF::Blazegraph
       io.rewind
 
       request = Net::HTTP::Post.new(request_url)
-      request['Content-Type'] = 
-        RDF::Writer.for(:nquads).format.content_type.last # use text/x-nquads
+      request['Content-Type'] = 'text/x-nquads'
       request.body = writer.dump(statements)
       
       @http.request(url, request)
@@ -173,7 +172,7 @@ module RDF::Blazegraph
     # @param [Net::HTTPResponse] response
     # @return [RDF::Enumerable]
     def read_rdf_response(response)
-      RDF::Reader.for(content_type: response.content_type).new(response.body)
+      RDF::Reader.for(content_type: 'application/n-quads').new(response.body)
     end
 
     ## 

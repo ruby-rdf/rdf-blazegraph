@@ -22,7 +22,7 @@ Gem::Specification.new do |gem|
   gem.required_ruby_version      = '>= 1.9.2'
   gem.requirements               = []
 
-  gem.add_runtime_dependency     'rdf', '~> 1.1'
+  gem.add_runtime_dependency     'rdf', '~> 1.99'
   gem.add_runtime_dependency     'sparql-client', '~>1.1'
 
   gem.add_development_dependency 'rdf-spec',    '~> 1.1', '>= 1.1.13'

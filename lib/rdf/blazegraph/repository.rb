@@ -1,3 +1,5 @@
+require 'sparql/client'
+
 module RDF::Blazegraph
   ##
   # An RDF::Repository implementaton for Blazegraph (formerly BigData).
@@ -29,9 +31,9 @@ module RDF::Blazegraph
     end
 
     ##
-    # @see RDF::Repository#has_predicate?
-    def has_context?(context)
-      rest_client.has_statement?(context: context)
+    # @see RDF::Repository#has_graph_name?
+    def has_graph_name?(graph_name)
+      rest_client.has_statement?(context: graph_name)
     end
 
     ##
@@ -78,13 +80,14 @@ module RDF::Blazegraph
       rest_client.has_statement?(subject:   statement.subject,
                                  predicate: statement.predicate,
                                  object:    statement.object,
-                                 context:   statement.context)
+                                 context:   statement.graph_name)
     end
 
     ##
     # @see SPARQL::Client::Repository#supports?
     def supports?(feature)
       return true if feature.to_sym == :context
+      return true if feature.to_sym == :graph_name
       super
     end
 
@@ -122,11 +125,11 @@ module RDF::Blazegraph
 
       query = client.construct(pattern).where(where_pattern)
       
-      unless where_pattern.context.nil?
-        where_pattern.context ||= NULL_GRAPH_URI
-        query.graph(where_pattern.context)
-        query.filter("#{where_pattern.context} != #{NULL_GRAPH_URI.to_base}") if
-          where_pattern.context.variable?
+      unless where_pattern.graph_name.nil?
+        where_pattern.graph_name ||= NULL_GRAPH_URI
+        query.graph(where_pattern.graph_name)
+        query.filter("#{where_pattern.graph_name} != #{NULL_GRAPH_URI.to_base}") if
+          where_pattern.graph_name.variable?
       end
 
       if block_given?

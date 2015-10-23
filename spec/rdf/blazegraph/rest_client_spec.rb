@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'rdf/vocab'
 
 describe RDF::Blazegraph::RestClient do
   subject { described_class.new(endpoint) }
@@ -7,10 +8,10 @@ describe RDF::Blazegraph::RestClient do
 
   let(:statements) do
     [ RDF::Statement(RDF::URI('http://ex.org/moomin'), 
-                     RDF::DC.title, 
+                     RDF::Vocab::DC.title, 
                      'moomin'), 
       RDF::Statement(RDF::URI('http://ex.org/moomin'), 
-                     RDF::DC.relation, 
+                     RDF::Vocab::DC.relation, 
                      RDF::Node.new) ]
   end
 
@@ -37,53 +38,53 @@ describe RDF::Blazegraph::RestClient do
              .to(contain_exactly(statements.first))
     end
 
-    context 'with contexts' do
-      before { subject.insert([with_context]) }
+    context 'with graph name' do
+      before { subject.insert([with_graph_name]) }
 
-      let(:with_context) do
+      let(:with_graph_name) do
         RDF::Statement(RDF::URI('http://ex.org/snorkmaiden'), 
-                       RDF::DC.description,
+                       RDF::Vocab::DC.description,
                        'Snorkmaiden',
-                       context: RDF::URI('http://ex.org/snork'))
+                       graph_name: RDF::URI('http://ex.org/snork'))
       end
 
-      it 'does not delete statement with missing context' do
-        with_context.context = nil
+      it 'does not delete statement with missing graph name' do
+        with_graph_name.graph_name = nil
 
-        expect { subject.delete([with_context]) }
+        expect { subject.delete([with_graph_name]) }
           .not_to change { subject.get_statements.to_a }
       end
 
-      it 'does not delete statement with mismatched context' do
-        with_context.context = RDF::URI('http://ex.org/wrong_graph')
+      it 'does not delete statement with mismatched graph name' do
+        with_graph_name.graph_name = RDF::URI('http://ex.org/wrong_graph')
 
-        expect { subject.delete([with_context]) }
+        expect { subject.delete([with_graph_name]) }
           .not_to change { subject.get_statements.to_a }
       end
 
-      it 'deletes correct context' do
-        expect { subject.delete([with_context]) }
+      it 'deletes correct graph name' do
+        expect { subject.delete([with_graph_name]) }
           .to change { subject.fast_range_count }.by(-1)
       end
 
       context 'with bnode' do
         it 'deletes correct statements' do
           statement = statements[1]
-          statement.context = RDF::URI('http://ex.org/new_context')
+          statement.graph_name = RDF::URI('http://ex.org/new_context')
           
           statement_no_node = statement.clone
           statement_no_node.object = RDF::Literal('snork!')
           
           subject.insert([statement, statement_no_node])
 
-          expect { subject.delete([statement, with_context]) }
+          expect { subject.delete([statement, with_graph_name]) }
             .to change { subject.fast_range_count }.by(-2)
-          expect(subject.has_statement?(context: with_context.context))
+          expect(subject.has_statement?(context: with_graph_name.graph_name))
             .to be false
           expect(subject.has_statement?(subject:   statement_no_node.subject,
                                         predicate: statement_no_node.predicate,
                                         object:    statement_no_node.object,
-                                        context:   statement_no_node.context))
+                                        context:   statement_no_node.graph_name))
             .to be true
         end
       end
@@ -206,25 +207,25 @@ describe RDF::Blazegraph::RestClient do
              .to(be_isomorphic_with(RDF::Graph.new.insert(*statements)))
     end
 
-    it 'inserts with context' do
+    it 'inserts with graph name' do
       statement = statements.first
       
-      statement.context = RDF::URI('http://ex.org/context')
+      statement.graph_name = RDF::URI('http://ex.org/name')
       
       expect { subject.insert([statement]) }
         .to change { subject.has_statement?(subject:   statement.subject,
                                             predicate: statement.predicate,
                                             object:    statement.object,
-                                            context:   statement.context) }
+                                            context:   statement.graph_name) }
              .to be true
     end
 
     it 'raises an error if not given a collection' do
-      expect { subject.insert(statements.first) }.to raise_error
+      expect { subject.insert(statements.first) }.to raise_error NoMethodError
     end
 
     it 'raises an error if given non-statements' do
-      expect { subject.insert(['blah']) }.to raise_error
+      expect { subject.insert(['blah']) }.to raise_error ArgumentError
     end
   end
 end
