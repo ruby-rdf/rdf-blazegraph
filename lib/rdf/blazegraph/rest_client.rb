@@ -118,13 +118,19 @@ module RDF::Blazegraph
       return self if statements.empty?
 
       statements.map! do |s| 
-        statement = RDF::Statement.from(s)
+        statement = RDF::Statement.from(s).dup
         statement.graph_name ||= NULL_GRAPH_URI 
         statement
       end
 
+      if statements.count == 1 && !statements.first.has_blank_nodes?
+        st = statements.first
+        query = access_path_query(st.subject, st.predicate, st.object, st.graph_name)
+        send_delete_request(query)
+      end
+
       constant = statements.all? do |statement|
-        !statement.respond_to?(:each_statement) && statement.constant? && 
+        !statement.respond_to?(:each_statement) && statement.constant? &&
           !statement.has_blank_nodes?
       end
 
@@ -167,7 +173,14 @@ module RDF::Blazegraph
       
       @http.request(url, request)
     end
-    
+
+    def send_delete_request(query)
+      query = "#{query[1..-1]}" if query.start_with? '&'
+      request = Net::HTTP::Delete.new(url + "?#{::URI::encode(query)}")
+      
+      @http.request(url, request)
+    end
+
     ## 
     # @param [Net::HTTPResponse] response
     # @return [RDF::Enumerable]

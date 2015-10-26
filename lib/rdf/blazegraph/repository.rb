@@ -20,6 +20,7 @@ module RDF::Blazegraph
 
     ##
     # @see RDF::Repository#each
+    # @todo this won't scale
     def each(&block)
       rest_client.get_statements.each_statement(&block)
     end
@@ -32,7 +33,7 @@ module RDF::Blazegraph
 
     ##
     # @see RDF::Repository#has_graph_name?
-    def has_graph_name?(graph_name)
+    def has_graph?(graph_name)
       rest_client.has_statement?(context: graph_name)
     end
 
@@ -96,12 +97,12 @@ module RDF::Blazegraph
     ##
     # Deletes the given RDF statements from the underlying storage.
     #
-    # Overridden here to use SPARQL/UPDATE
+    # Overridden here to use the Blazegraph REST client
     #
     # @param  [RDF::Enumerable] statements
     # @return [void]
     def delete_statements(statements)
-      @rest_client.delete(statements)
+      rest_client.delete(statements)
     end
 
     ##
@@ -114,6 +115,9 @@ module RDF::Blazegraph
       pattern.predicate ||= RDF::Query::Variable.new
       pattern.object    ||= RDF::Query::Variable.new
       pattern.initialize!
+
+      return fast_pattern(pattern, &block) unless 
+        pattern.subject.node? || pattern.predicate.node? || pattern.object.node?
 
       # Blazegraph objects to bnodes shared across the CONSTRUCT & WHERE scopes
       # so we dup the pattern with fresh bnodes
@@ -139,12 +143,31 @@ module RDF::Blazegraph
       end
     end
 
+    def fast_pattern(pattern, &block)
+      pattern = pattern.dup
+      pattern.graph_name = NULL_GRAPH_URI if pattern.graph_name == false
+
+      reader = 
+        rest_client.get_statements(subject: variable_to_nil(pattern.subject),
+                                   predicate: variable_to_nil(pattern.predicate),
+                                   object: variable_to_nil(pattern.object),
+                                   context: variable_to_nil(pattern.graph_name))
+
+      return reader.each_statement(&block) if block_given?
+      reader.each_statement
+    end
+
     def insert_statements(statements)
       rest_client.insert(statements)
     end
 
     def insert_statement(statement)
       rest_client.insert([statement])
+    end
+
+    def variable_to_nil(term)
+      return nil unless term
+      term.variable? ? nil : term
     end
   end
 end
