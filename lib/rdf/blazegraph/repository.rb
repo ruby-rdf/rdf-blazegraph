@@ -20,6 +20,7 @@ module RDF::Blazegraph
 
     ##
     # @see RDF::Repository#each
+    # @todo this won't scale
     def each(&block)
       rest_client.get_statements.each_statement(&block)
     end
@@ -115,7 +116,8 @@ module RDF::Blazegraph
       pattern.object    ||= RDF::Query::Variable.new
       pattern.initialize!
 
-      # return fast_pattern(pattern, &block) unless pattern.has_blank_nodes?
+      return fast_pattern(pattern, &block) unless 
+        pattern.subject.node? || pattern.predicate.node? || pattern.object.node?
 
       # Blazegraph objects to bnodes shared across the CONSTRUCT & WHERE scopes
       # so we dup the pattern with fresh bnodes
@@ -141,18 +143,19 @@ module RDF::Blazegraph
       end
     end
 
-    # def fast_pattern(pattern, &block)
-    #   pattern = pattern.dup
+    def fast_pattern(pattern, &block)
+      pattern = pattern.dup
+      pattern.graph_name = NULL_GRAPH_URI if pattern.graph_name == false
 
-    #   reader = 
-    #     rest_client.get_statements(subject: variable_to_nil(pattern.subject),
-    #                                predicate: variable_to_nil(pattern.predicate),
-    #                                object: variable_to_nil(pattern.object),
-    #                                context: variable_to_nil(pattern.graph_name))
+      reader = 
+        rest_client.get_statements(subject: variable_to_nil(pattern.subject),
+                                   predicate: variable_to_nil(pattern.predicate),
+                                   object: variable_to_nil(pattern.object),
+                                   context: variable_to_nil(pattern.graph_name))
 
-    #   return reader.each_statement(&block) if block_given?
-    #   reader.each_statement
-    # end
+      return reader.each_statement(&block) if block_given?
+      reader.each_statement
+    end
 
     def insert_statements(statements)
       rest_client.insert(statements)
@@ -163,7 +166,7 @@ module RDF::Blazegraph
     end
 
     def variable_to_nil(term)
-      return nil if term.nil?
+      return nil unless term
       term.variable? ? nil : term
     end
   end
