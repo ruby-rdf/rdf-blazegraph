@@ -19,6 +19,12 @@ module RDF::Blazegraph
     end
 
     ##
+    # @see RDF::Mutable#delete_insert
+    def delete_insert(deletes, inserts)
+      rest_client.delete_insert(deletes, inserts)
+    end
+
+    ##
     # @see RDF::Repository#each
     # @todo this won't scale
     def each(&block)
@@ -95,6 +101,13 @@ module RDF::Blazegraph
     protected
 
     ##
+    # @private
+    # @see RDF::Mutable#clear
+    def clear_statements
+      rest_client.clear_statements
+    end
+
+    ##
     # Deletes the given RDF statements from the underlying storage.
     #
     # Overridden here to use the Blazegraph REST client
@@ -109,7 +122,7 @@ module RDF::Blazegraph
     # Queries `self` for RDF statements matching the given `pattern`.
     #
     # @see SPARQL::Client::Repository#query_pattern
-    def query_pattern(pattern, &block)
+    def query_pattern(pattern, options = {}, &block)
       pattern = pattern.dup
       pattern.subject   ||= RDF::Query::Variable.new
       pattern.predicate ||= RDF::Query::Variable.new

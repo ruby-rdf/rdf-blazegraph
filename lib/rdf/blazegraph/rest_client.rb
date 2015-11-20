@@ -19,6 +19,12 @@ module RDF::Blazegraph
     end
 
     ##
+    # Deletes all statements from the server
+    def clear_statements
+      send_delete_request('')
+    end
+
+    ##
     # Send a request to the server
     #
     # @param [String] query
@@ -141,6 +147,16 @@ module RDF::Blazegraph
       end
 
       return self
+    end
+
+    ##
+    # @param [RDF::Enumerable<RDF::Statement>, Array<RDF::Statement>] dels
+    # @param [RDF::Enumerable<RDF::Statement>, Array<RDF::Statement>] ins
+    #
+    # @return [RDF::Blazegraph::RestClient] self
+    def delete_insert(deletes, ins)
+      delete(deletes)
+      insert(ins)
     end
 
     private

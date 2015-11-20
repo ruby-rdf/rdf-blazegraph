@@ -16,6 +16,15 @@ describe RDF::Blazegraph::RestClient do
   end
 
   before { repository.clear! }
+
+  describe '#clear_statements' do
+    before { subject.insert(statements) }
+
+    it 'removes all statements' do
+      expect { subject.clear_statements }
+        .to change { subject.fast_range_count }.to(0)
+    end
+  end
   
   describe '#fast_range_count' do
     it 'changes when statements are added' do
