@@ -110,9 +110,16 @@ module RDF::Blazegraph
     ##
     # @param [RDF::Enumerable] statements
     #
+    # @raise [ArugmentError] when a statement is invalid
     # @todo handle blank nodes
     def insert(statements)
-      send_post_request(url, statements)
+      sts = statements.lazy.map do |st|
+        raise ArgumentError, "Invalid statement #{st}" if 
+          st.respond_to?(:invalid?) && st.invalid?
+        st
+      end
+
+      send_post_request(url, sts)
       return self
     end
 
@@ -178,11 +185,8 @@ module RDF::Blazegraph
     end
     
     def send_post_request(request_url, statements)
-      io = StringIO.new
       writer = RDF::Writer.for(:nquads)
       
-      io.rewind
-
       request = Net::HTTP::Post.new(request_url)
       request['Content-Type'] = 'text/x-nquads'
       request.body = writer.dump(statements)
