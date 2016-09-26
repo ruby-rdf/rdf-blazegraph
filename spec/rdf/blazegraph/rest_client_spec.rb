@@ -3,7 +3,7 @@ require 'rdf/vocab'
 
 describe RDF::Blazegraph::RestClient do
   subject { described_class.new(endpoint) }
-  let(:endpoint)   { 'http://localhost:9999/bigdata/sparql' }
+  let(:endpoint)   { 'http://127.0.0.1:9999/blazegraph/sparql' }
   let(:repository) { RDF::Blazegraph::Repository.new(uri: endpoint) }
 
   let(:statements) do
