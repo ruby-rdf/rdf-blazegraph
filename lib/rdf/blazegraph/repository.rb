@@ -19,16 +19,15 @@ module RDF::Blazegraph
     end
 
     ##
-    # @see RDF::Mutable#delete_insert
-    def delete_insert(deletes, inserts)
-      rest_client.delete_insert(deletes, inserts)
+    # @see RDF::Repository#each
+    def each(&block)
+      each_statement(&block)
     end
 
     ##
-    # @see RDF::Repository#each
-    # @todo this won't scale
-    def each(&block)
-      rest_client.get_statements.each_statement(&block)
+    # @see RDF::Mutable#delete_insert
+    def delete_insert(deletes, inserts)
+      rest_client.delete_insert(deletes, inserts)
     end
 
     ##
@@ -119,6 +118,14 @@ module RDF::Blazegraph
     end
 
     ##
+    # @see RDF::Repository#each_statement
+    #
+    # @todo this won't scale
+    def each_statement(&block)
+      rest_client.get_statements.each_statement(&block)
+    end
+
+    ##
     # Queries `self` for RDF statements matching the given `pattern`.
     #
     # @see SPARQL::Client::Repository#query_pattern
@@ -135,9 +142,9 @@ module RDF::Blazegraph
       # Blazegraph objects to bnodes shared across the CONSTRUCT & WHERE scopes
       # so we dup the pattern with fresh bnodes
       where_pattern = pattern.dup
-      where_pattern.subject = RDF::Node.new if where_pattern.subject.node?
+      where_pattern.subject = RDF::Node.new   if where_pattern.subject.node?
       where_pattern.predicate = RDF::Node.new if where_pattern.predicate.node?
-      where_pattern.object = RDF::Node.new if where_pattern.object.node?
+      where_pattern.object = RDF::Node.new    if where_pattern.object.node?
       where_pattern.initialize!
 
       query = client.construct(pattern).where(where_pattern)
@@ -156,6 +163,8 @@ module RDF::Blazegraph
       end
     end
 
+    ##
+    # @private
     def fast_pattern(pattern, &block)
       pattern = pattern.dup
       pattern.graph_name = NULL_GRAPH_URI if pattern.graph_name == false
@@ -170,14 +179,20 @@ module RDF::Blazegraph
       reader.each_statement
     end
 
+    ##
+    # @private
     def insert_statements(statements)
       rest_client.insert(statements)
     end
 
+    ##
+    # @private
     def insert_statement(statement)
       rest_client.insert([statement])
     end
 
+    ##
+    # @private
     def variable_to_nil(term)
       return nil unless term
       term.variable? ? nil : term
