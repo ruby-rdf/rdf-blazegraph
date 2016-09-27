@@ -1,5 +1,10 @@
 *~
 #*#
 
+*.sh
+*.jar
+*.jnl
+*.log
+
 *.gem
 Gemfile.lock
