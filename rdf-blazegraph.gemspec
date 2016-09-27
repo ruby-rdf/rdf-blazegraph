@@ -19,16 +19,18 @@ Gem::Specification.new do |gem|
   gem.require_paths      = %w(lib app)
   gem.has_rdoc           = false
 
-  gem.required_ruby_version      = '>= 1.9.2'
+  gem.required_ruby_version      = '>= 2.0.0'
   gem.requirements               = []
 
-  gem.add_runtime_dependency     'rdf', '~> 1.99'
-  gem.add_runtime_dependency     'sparql-client', '~>1.1'
+  gem.add_runtime_dependency     'rdf',           '~> 2.0'
+  gem.add_runtime_dependency     'sparql-client', '~> 2.0'
 
-  gem.add_development_dependency 'rdf-spec',    '~> 1.1', '>= 1.1.13'
-  gem.add_development_dependency 'rspec',       '~> 3.0'
-  gem.add_development_dependency 'rspec-its',   '~> 1.0'
-  gem.add_development_dependency 'yard',        '~> 0.8'
+  gem.add_development_dependency 'linkeddata',    '~> 2.0'
+  gem.add_development_dependency 'rdf-spec',      '~> 2.0'
+  gem.add_development_dependency 'rdf-vocab',     '~> 2.0'
+  gem.add_development_dependency 'rspec',         '~> 3.0'
+  gem.add_development_dependency 'rspec-its',     '~> 1.0'
+  gem.add_development_dependency 'yard',          '~> 0.8'
 
   gem.post_install_message       = nil
 end
