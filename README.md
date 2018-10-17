@@ -40,7 +40,7 @@ This repository uses [Git Flow](https://github.com/nvie/gitflow) to mange develo
 * Don't touch the `.gemspec` or `VERSION` files. If you need to change them,
   do so on your private branch only.
 * Do feel free to add yourself to the `CREDITS` file and the
-  corresponding list in the the `README`. Alphabetical order applies.
+  corresponding list in the `README`. Alphabetical order applies.
 * Don't touch the `AUTHORS` file. If your contributions are significant
   enough, be assured we will eventually add you in there.
 * Do note that in order for us to merge any non-trivial changes (as a rule
