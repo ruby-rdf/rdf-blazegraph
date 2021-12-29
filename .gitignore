@@ -7,4 +7,6 @@
 *.log
 
 *.gem
+doc/*
+.yardoc/*
 Gemfile.lock
